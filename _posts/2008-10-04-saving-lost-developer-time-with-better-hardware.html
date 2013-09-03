@@ -1,0 +1,48 @@
+---
+layout: post
+title: Saving lost developer time with better hardware
+categories:
+- General Agile
+tags: []
+status: publish
+type: post
+published: true
+meta: {}
+---
+A common problem that I see on projects is that the computers available to the teams are mediocre. The obvious example of this is when the computers given to developers are mediocre, but I also think that there is a compelling point to be made around solving performance on build machines with hardware instead of software.
+
+<h2>Developer Machines</h2>
+
+I was once on a project where the local update and build process became an hour long. I won't get into the details, but it was largely an IO bound delay, with portions with the processor as the bottleneck. We were using Dell 610 laptops. When some developers started gettting Dell 620's (dual core laptops), we discovered that it reduced the local build time on the machines by 33% to 50%. Whoa.
+
+Think about that. A 60 minute build cut down to 30 minutes. Let's assume that developers only build once per day and that each developer has an average cost of $100 per hour (total cost to the organization, not just wages). With those savings, getting every developer a Dell 620 instead of a Dell 610 pays for itself in couple weeks. This is just considered cutting a long build in half. There are many other situations where having a slow machine causes lost developer time.
+
+We lobbied for getting the developers better machines, and were mostly denied. I discovered that organizations measure the cost of people separate from the cost of hardware. In fact, they may be accounted for by different departments entirely, where an arbitrary budget is given to the department that issues employee computers.
+
+I've seen this on every project I've been on. We are given slow machines, and time is lost. It may be lost because I'm running grep over a lot of files, it may be because when I have my all my development tools open and the machine slows down.
+
+I think that it's fine that organizations begin developers with cheap machines, but they should be quick to spend money at the first sign that it is needed by the developers. I believe that it is an aspect of agility that many organizations fall short on, where the ability to respond to constraints in the software development system is hindered by the structure and policies of the organization.
+
+In fact, I think that IT organizations should do a few tests against their technology stack and see what kind of performance difference exist, and use those numbers to decide what kind of machines that developers can use that will result in the best performance while being reasonable on cost. This is especially true of Java J2EE projects, as most of the tools and applications are intensive, and the time it takes to build an entire application can be intensive.
+
+<h2>Build Machines</h2>
+
+If your project has any kind of continuous integration (and it should!) then you have probably felt the pain of long builds at some point. I've seen this on every project I've been on. There are two areas in particular that I've found to be painful: Long running regression or acceptance tests, and long compilation and deployment cycles due to heavyweight tools.
+
+Often builds and tests are segmented into builds that are run locally on developer machines, and builds that are run by the build server. A typical approach is to have developers run unit tests and fast running integration tests locally while developing, but to have long running integration tests and acceptance tests run by a build server, where failures will be fixed later by developers when the build completes.
+
+Many projects will find over time that the time it takes to run these large integration tests and acceptance tests becomes so long that the value is reduced. The time it takes to get feedback might be hours or even days. Often, these tests are failing, as by the time they complete, multiple developers or teams may made changes that break a portion of the test suite.
+
+I've seen or read of different approaches to this problem, from using in-memory databases, to manually splitting the regression suites into separate builds or "pipelines", to <a href="http://en.wikipedia.org/wiki/Distributed_computing">distributed computing</a>, to transparent parallelization of tests.
+
+An example of a new tool for transparently running tests in parallel is the <a href="http://selenium-grid.openqa.org/">Selenium Grid</a> which attempts to run selenium tests in parallel. While I think there is merit in exploring these tools, they are non-trivial to setup and maintain, and while it may result in the build/test time being cut down to a fraction of it's original time, it increases the complexity of the infrastructure that developers will have to maintain. There tends to be surprise issues with parallization as well. You have to make sure that you can have tests that are writing to the filesystem, querying a database, or calling other services in parrallel.
+
+One day, I hope to try a different approach. I would rather spend the money trying to use hardware to solve the problem instead of using some complicated tool. From a previous experience of dealing with an incredibly IO bound build, I've long dreamt of building a hard drive out of RAM. I'm not talking about using flash memory; I'm talking about using DDR RAM instead of a traditional hard drive.
+
+I recently looked into this concept, and I found that there are a few manufacturers out there that provide devices to do this very thing, such as the <a href="http://www.hyperossystems.co.uk/07042003/hardware.htm#hyperosHDIIproduct">Hyper Drive 4</a>. There are a few other devices out there that can achieve this, but I liked the information/propaganda on the Hyper Drive page the best.
+
+The <a href="http://www.hyperossystems.co.uk/07042003/hardware.htm#">stats</a> claimed by using a RAM based hard disk are nothing short of sexy.
+
+I won't reiterate the numbers here, but depending on the usage, it ranges from an order of magnitude to several orders of magnitude in increased performance. Even in builds and test suites that are not predominately IO bound, I am willing to bet that the performance boost to the operating system will translate into large gains for the performance of the tests. My favorite statistic was that Windows XP booted in 2 seconds with their test configuration, and that was only because of device polling.
+
+I don't think that the cost of such as system is unreasonable. One 16 gigabyte drive using the Hyper Drive system would probably cost around $5000. Assuming an average developer cost of $100 dollars an hour, it pays for itself if one week of 1 developers time is saved, let alone considering the benefits to an entire team. Come to think of it, I would argue that developers should have similar setups for their local machines. For instance, grep would probably be instantaneous with a DDR based drive.

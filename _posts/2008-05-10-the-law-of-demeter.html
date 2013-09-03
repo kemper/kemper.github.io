@@ -1,0 +1,119 @@
+---
+layout: post
+title: The Law of Demeter
+categories:
+- Best Practices
+tags: []
+status: publish
+type: post
+published: true
+meta: {}
+---
+The other day I came across a reference to something called the law of demeter. With much sadness, I realized that I could not remember what that law was. It sounded familiar, and was probably an answer to some test question in college. Nonetheless, I had forgotten it, and I felt that it was my duty to look it up.
+
+Wikipedia had a nice page[1] on it, and I was happy to know that I was following this policy already. In fact, the concept is core to well encapsulated code and a good domain model.
+
+It's a shame that it has such a pedantic sounding name; I don't see myself being able to tell someone that their code would better if they only followed the law of demeter. Principle of least knowledge sounds better, but it's still kind of vague. Unfortunately, it's a very commonly violated principle, but it is one that should guide our default programming behavior. That is, when we aren't being forced to violate it because of an api or legacy code base.
+
+Anyway, to summarize what it is, it basically says that an object A can only use other objects that are fields, parameters to a method, or created inside of A. Here is a nicely contrived example of violating this principle:
+<pre>
+[code lang="java"]
+class Book {
+    double cost;
+    public double getCost() { return cost; }
+}
+
+class ShoppingCart {
+    List<Book> books;
+    public List<Book> getBooks() { return books; }
+}
+
+public class SalesCalculator {
+    public void calculateTotalCost(ShoppingCart cart) {
+        double total = 0;
+        for (Book item : cart.getBooks()) {
+            total += item.getCost();
+        }
+        System.out.println("Total cost is: " + total);
+    }
+}
+[/code]
+</pre>
+Actually, this isn't that contrived. For some reason, people love putting calculations into a class with Calculator in the name. In this example, SalesCalculator knows about more than just the ShoppingCart it's given. It knows about the internals of the shopping cart. Not only does it know that it has books, but that it stores the books in a List. Now, the getter provides a slight appearance that it doesn't really know that it's stored in a list, but in this example, it's returning the exact list object that it is storing internally. In this situation, if I modify the list outside of the ShoppingCart, then it's internal state changes. We may as well be accessing books by doing a cart.books and leave out the getter code.
+
+I'm digressing here; there is probably some other elitist sounding principle that basically says that I should not be able to mutate an objects internal state from outside the object. An improved version of the code would look like:
+<pre>
+[code lang="java"]
+class Book {
+    double cost;
+    public double getCost() { return cost; }
+}
+
+class ShoppingCart {
+    List<Book> books;
+    public double calculateTotalCost() {
+        double total = 0;
+        for (Book book : books) {
+            total += book.getCost();
+        }
+        return total;
+    }
+}
+
+public class SalesCalculator {
+    public void calculateTotalCost(ShoppingCart cart) {
+        System.out.println("Total cost is: "
++ cart.calculateTotalCost());
+    }
+}
+[/code]
+</pre>
+That's better. Now SalesCalculator knows nothing about Book objects, nor is it playing around with the List that shopping cart was using to hold the books. In fact, it looks like the SalesCalculator barely has a reason to exist. And it probably shouldn't, not as a calculator. Maybe it could be a SalesPrinter or something.
+
+The benefit of this increases as the logic of a domain model grows. Another common smell are objects like Managers:
+<pre>
+[code lang="java"]
+class ShoppingCart {
+    List<Book> books;
+    int numberOfComicBooks;
+    public List<Book> getBooks() {
+        return books;
+    }
+    public int getNumberOfComicBooks() {
+        return numberOfComicBooks;
+    }
+    public void setNumberOfComicBooks(int numberOfComicBooks) {
+        this.numberOfComicBooks = numberOfComicBooks;
+    }
+}
+
+class ShoppingCartManager {
+    public void addBookToCart(ShoppingCart cart, Book book) {
+        cart.getBooks().add(book);
+        if (book.isComicBook) {
+            cart.setNumberOfComicBooks(
+cart.getNumberOfComicBooks() + 1);
+        }
+    }
+}
+[/code]
+</pre>
+Why can't the Shopping cart manage the adding of books and counting of comic books itself? If it did we would have less code anyway:
+<pre>
+[code lang="java"]
+class ShoppingCart {
+    List<Book> books;
+    int numberOfComicBooks;
+
+    public void add(Book book) {
+        books.add(book);
+        if (book.isComicBook()) {
+            numberOfComicBooks++;
+        }
+    }
+}
+[/code]
+</pre>
+Some developers have a default behavior that results in less code following the law of demeter (and tosses encapsulation in the garbage). That is, when they create an object, they immediately have their IDE generate getters and setters for all the fields they added. I think the idea is that it will save them time later or some nonsense like that. The unfortunate reality is that when I begin changing the ShoppingCart class, I'm going to have to traverse a tangled web of references across the code base trying to figure out what other objects are holding onto the ShoppingCarts book list and changing it on me. It gets even worse if you introduce multiple threads in to the mix.
+
+[1] http://en.wikipedia.org/wiki/Law_of_Demeter

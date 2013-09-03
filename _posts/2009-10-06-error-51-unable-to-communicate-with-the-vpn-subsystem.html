@@ -1,0 +1,50 @@
+---
+layout: post
+title: ! 'Error 51: Unable to communicate with the VPN subsystem'
+categories:
+- General Agile
+tags: []
+status: publish
+type: post
+published: true
+meta: {}
+---
+I upgraded Mac OS X to 10.5.8. I did the upgrade after my hard drive died and imported my profile from an old backup. When I tried to run my Cisco VPN client that I use for work, I was given this error:
+
+Error 51: Unable to communicate with the VPN subsystem
+
+First, I read that I could do this in the terminal:
+
+<div style="background-color: black; color:white;">
+$ sudo /System/Library/StartupItems/CiscoVPN/CiscoVPN restart
+</div>
+
+Since I don't have a CiscoVPN directory under startup items, that didn't help me. Then I read that you need to to repair disk permissions using disk utility. I did that and it found several inconsistencies. Good stuff, though, it also did not solve my problem.
+
+Then, I read that I could do this:
+
+<div style="background-color: black; color:white;">$ sudo SystemStarter restart CiscoVPN</div>
+
+The command didn't produce any output, nor did it fix my problem.
+
+Finally, I came across a site that told me to do this:
+
+<div style="background-color: black; color:white;">
+$ sudo kextunload /System/Library/Extensions/CiscoVPN.kext <br />
+$ sudo kextload /System/Library/Extensions/CiscoVPN.kext
+</div>
+
+This finally fixed my problem. Here is the sequence of commands that I ran and the output:
+
+<div style="background-color: black; color:white;">
+$ sudo kextunload /System/Library/Extensions/CiscoVPN.kext
+kextunload: unload kext /System/Library/Extensions/CiscoVPN.kext failed
+$ sudo kextload /System/Library/Extensions/CiscoVPN.kext
+kextload: /System/Library/Extensions/CiscoVPN.kext loaded successfully
+$ sudo kextunload /System/Library/Extensions/CiscoVPN.kext
+kextunload: unload kext /System/Library/Extensions/CiscoVPN.kext succeeded
+$ sudo kextload /System/Library/Extensions/CiscoVPN.kext
+kextload: /System/Library/Extensions/CiscoVPN.kext loaded successfully
+</div>
+
+Hopefully, this will save someone some time.

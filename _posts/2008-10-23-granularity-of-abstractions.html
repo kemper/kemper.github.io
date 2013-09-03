@@ -1,0 +1,84 @@
+---
+layout: post
+title: Granularity of Abstractions
+categories:
+- The Art of Programming
+tags: []
+status: publish
+type: post
+published: true
+meta: {}
+---
+In Java, iterating over a collection and collecting some objects based on a condition is a classic example of something to put into a method. Here is an example:
+
+[code lang="java"]
+
+private Collection<Claim> getExpiredClaims() {
+    List<Claim> expiredClaims = new ArrayList<Claim>();
+    for (Claim claim : allClaims) {
+        if (claim.isExpired()) {
+            expiredClaims.add(claim);
+        }
+    }
+    return expiredClaims;
+}
+
+[/code]
+
+In Ruby, you can do this in one line.
+
+[code lang="java"]
+
+all_claims.select { |claim| claim.expired? }
+
+[/code]
+
+It's lovely how much more succinct that operation becomes. It can actually get more succinct by using <a href="http://api.rubyonrails.org/classes/Symbol.html">Symbol#to_proc</a>:
+
+[code lang="java"]
+
+all_claims.select (&:expired?)
+
+[/code]
+
+There is still the question of whether to move this to a method. Now, moving it to a method doesn't reduce multi-line duplication the way it would in the Java example; there is only a minor amount of single line duplication that can be reduced.
+
+The resistance I often get to refactoring a single line to a method is that it creates more total lines in the file with the def/end lines and spacing. Also, it takes a slight amount of effort to do the refactoring, and some developers won't refactor unless the need is glaring and obvious.
+
+There are still important reasons to move this to a method, and those reasons are better readability of code and reducing duplication of expressions. Without the refactoring, you'll see code that looks like this:
+
+[code lang="Java"]
+
+def mark_expired_claims_for_review
+    all_claims.select (&:expired?).each(&:needs_review!)
+end
+
+def notify_claim_agents_of_expired_claims
+    all_claims.select (&:expired?).each(&:notify_agent_of_expiration)
+end
+
+[/code]
+
+After the refactoring, this is what it would look like.
+
+[code lang="java"]
+
+def expired_claims
+    all_claims.select(&:expired?)
+end
+
+def mark_expired_claims_for_review
+    expired_claims.each(&:needs_review!)
+end
+
+def notify_claim_agents_of_expired_claims
+    expired_claims.each(&:notify_agent_of_expiration)
+end
+
+[/code]
+
+It's a minor point perhaps, and I'm sure that I could come up with much more excessive examples, but I just wanted to focus on a simple example. By replacing the expression with a symbolic reference, a method in this case, you express in English something that is a programmatic operation. This improves readability quite a bit.
+
+Also, there is the additional benefit of abstracting on the concept of expired claims. By having multiple places using "all_claims.select(&:expired?)" to express expired claims, you duplicate the implementation detail that expired claims are derived from a larger collection of claims. This may not always be true, and a change in that derivation results in a change in many places.
+
+Perhaps the question here is how DRY should you make your code. I'm still undecided on this on this point, but I think that the amount of work that it takes to reduce duplication to this level is minimal, and the result will be an important part of a pristine codebase.

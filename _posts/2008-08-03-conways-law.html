@@ -1,0 +1,20 @@
+---
+layout: post
+title: Conway's law
+categories:
+- General
+tags: []
+status: publish
+type: post
+published: true
+meta: {}
+---
+<a href="http://en.wikipedia.org/wiki/Conway%27s_Law" >Conway's law</a> essentially states that the structure of a software system will reflect the structure of the organization that makes it.
+
+I've seen this effect in small companies with little structure and who seem to be constantly "putting out fires." This is probably the easiest one to point out, but the code base is often highly chaotic and unstructured. The opposite of that is that rigidly structured organizations have rigidly structured code.
+
+I worked on a project once in a large, very hierarchically structured organization. Sure enough, the code base had a hierarchical structure where modules depended on other modules in a way that could almost be put into an organizational chart. Additionally, the company had divisions that interacted on a contractual basis as though they were seperate companies, and that extended to the software teams. Each team would integrate on a software "contract" basis, and it looked bad if one team "broke" that contract.
+
+I remembered this again the other day when another developer was telling me of a manufacturing company that he worked for. He described how data was often processed from one database and stored in another, and at some point, a cron job would start a process that would pick the data up, do something with it, and store the results somewhere else for some other application. It sounded a lot like how a manufacturing plant works.
+
+I'm sure there is a wide variety of reasons why Conway's law happens, but I see a couple of primary reasons. One is that whatever theory of management a company implements will almost certainly extend to the software development management, as in my example of a hierarchical organization. The manufacturing example is potentially different. In the case of manufacturing software, I think that it could be the domain that results in the structure of both the management and the software. In the first case, the structure of the software was imposed upon it because it suited the management structure, and in the second case, both the management and the software are structured in order to support the business processes that need to happen.

@@ -1,0 +1,86 @@
+---
+layout: post
+title: Planet Wars Post-Mortem
+categories:
+- The Art of Programming
+tags: []
+status: publish
+type: post
+published: true
+meta: {}
+---
+I can't believe I lost.
+
+I can't believe I lost decisively at all. 
+
+Being way behind for the entire competition was an indicator of having a poor chance, but I after wishing really, really hard to win, it was somewhat of a surprise.
+
+Seriously, this was the most fun programming I've had in a long time, and I look forward to the next competition. I want to say congratulations to <a href="http://quotenil.com/">Gábor Melis</a>, who's bot, bocsimacko, took first place. I remember when I first saw his bot on the <a href="http://www.benzedrine.cx/dhartmei.html">Dhartmei</a> server (an alternate TCP server we could use to get more frequent games); it had a win rate of 98%. That was playing the best bots at the time such as dmj11 and McLeopold. I spent a lot of time trying to watch his bot and think about how he made it. Now that the source code is available <a href="http://quotenil.com/git/?p=planet-wars.git">here</a>. I plan and playing with it and understanding it better. His win I think has clinched my decision to learn lisp, and use that language in the next competition.
+
+The high point of the contest was when I reached 13th place, and spent a good part of a week in the top 30's. 2 or 3 weeks before the end of the tournament, I had been ranked in the 50's and 60's. Then the map generator changed and it slipped down to about 150. Alas, I was not able to improve my bot much during those 2 weeks. I had really hoped I would be in the top 100, and for the first day and a half of the finals, I was in the 80's. It made it an exciting end to the contest. In the end, my rank was 122 (out of 4617).
+
+The other major unfortunate occurrence was that I attempted to rewrite my bot to include better modeling of future states of the board, and to allow for a multiplanet coordinated attack system. That rewrite never performed better than the pre-rewrite version of my bot, so I never got to use that code. The next phase of my plan was to begin simulating out the board with an enemy AI and select the most favorable future based on that simulation. However, my dreams were bigger than my time available, and was never realized.
+
+If you would like to see the final submission version of my bot, it's located <a href="https://github.com/kemper/PlanetWars">here</a>:
+
+If you would like to look at the rewrite version, it's located <a href="https://github.com/kemper/PlanetWarsRewrite">here</a>
+
+<h3>Approach</h3>
+
+I made the somewhat regrettable decision to use Java for the submission. This was mostly due to my comfort with the language, and my fear of hitting a performance bottleneck later when I wouldn't have time to switch languages. I say that it's somewhat regrettable because I did eventually hit performance issues indicating some languages would perhaps have been too restrictive. However, Java is a verbose and clunky language, and I found it quite painful to use (I've been programming in ruby the last 2 years).
+
+I wrote some scripting do all the simple tasks that I needed such as compiling and running my code against all the example bots, but a coworker of mine, Tony Pitluga, provided some better scripting so I used that.
+
+My development approach was fairly modest. Just add simple actions that improve my rating. Once I had all the core actions done, tweak them to make them better. Test against previous versions of my bots and the example bots. Eventually, when I had a fairly good bot I was going to learn and then implement AI algorithms such as A* or minimax.
+
+<h3>Implementation</h3>
+
+In the end, my general algorithm was:
+
+1. Rescue my planets that will be lost, picking the closest available planets
+
+2. Try to do a simple snipe on the enemy if the oppurtunity presents itself
+
+3. Attack the most valuable planets as determined by a simple value function, using my closest planets, and only doing single (source) planet attack.
+
+4. Move remaining ships into the nearest, most valuable neutral that I don't think is at risk of being taken by the enemy, unless the enemy or I are attacking each other
+
+5. Move remaining ships into my most strategic planets, where the most strategic planets those being closest to the enemy (a combination of min and average distance)
+
+Along the way there were a few major things that made a big difference in my elo score. 
+
+1. When attacking, I added logic to not consider neutrals if the return on investment was better with other neutrals by waiting some number of turns. 
+
+2. The logic to blindly stream planets into close neutrals was implemented at the same time, and seemed to work well combined with the previous point
+
+3. Deciding whether to continue aquiring planets. For instance, if my growth rate is better than the opponent, then only consider attacking the enemy.
+
+4. Playing out the future states of individual planets. That is, playing out all fleets in motion and then considering the future state when making certain decisions. Most notable was determining my most strategic planets, and figuring the ships needed to rescue and win a planet.
+
+In addition to those significant additions, there were a number of important bits of logic that needed to be considered. One of the most important was deciding how many ships to send away from a planet. The simple solution to that problem is to look at the closest enemy planet, and not send so many that that enemy planet could take your planet. While it had obvious shortcomings that resulted in a lot of losses, other simple variations that I tried were worse, often making my bot too defensive.
+
+I believed that the best solution to that decision is to find the difference in the ships that could attack a planet versus rescue it, and then base my decisions on that. I attempted this in my rewrite that I did, but it did not seem to have an appreciable improvement. I'm not sure why, but that was when I started running out of time, so I didn't investigate this further.
+
+<h3>Testing</h3>
+
+Initially, I attempted to test my code using scenarios. ie: Given 2 neutrals at the same distance, I'll take the one with the better growth rate. This quickly became an annoyance to me, as they were constantly breaking (and being invalidated) when I added more complicated decisions, and I would have to keep adding to each one to reflect that complexity. For instance, if I now value neutrals differently based on proximity to the enemy, I would have to change all my scenarios. I deleted all those tests after the first week. I felt that that style of testing did not help me to make my algorithms more correct the first time, or really keep them correct.
+
+In the end, the tests that were most valuable were the ones that tested calculations. For instance, trying to determine the ships needed to win a planet based on incoming fleets at varying distances. The nature, or "truth" of these kinds of assertions never fundamentally changes, is difficult to get right the first time through manual testing, and is greatly benefitted from having tests when the code is changed (such as when I optimized it). In particular, that logic can be wrong and your bot could do something close to correct a lot of the time, masking the error.
+
+My regression testing was to test my changed bot against my previous versions and the example bots and note the difference in wins and losses. I would then look at why I lost on specific maps, and tweaked code to address what I saw. I would then rerun those maps against multiple bots to see if I fixed or improved that scenario.
+
+Outside of that, testing on the Dhartmei server was my last major prerelease test, though, it suffered from variability due to the fluctuating set of bots on the list, so it's difficult to compare your new bots performance without running multiple versions on the server for a while.
+
+<h3>Lessons Learned</h3>
+
+1. Keep an eye on the forums. I didn't realize the map generator had changed until days after it happened. 
+
+2. Leverage Dharmei's server more. I spent a lot of time doing regression testing against old versions of my bots, but that isn't the best metric. The version of my bot that I ended up submitting surprised me; it was only marginally better against it's previous versions, but it's elo on the Dhartmei server jumped 200 points over the previous version.
+
+3. Don't take one computer as the final word when evaluating performance. I had despair towards the end when I found my simple simulations took 400 milliseconds on my 5 year old desktop. When I ran it on my 3 year old MacBook pro, it ran in less than 80 milliseconds. For all I know, it could run in less than 10 milliseconds on newer hardware.
+
+4. Know more than one high performance language, and make sure you like one of them
+
+5. Set some serious time aside closer to the end of the tournament. A couple of hours of work here and there while holding a baby won't allow you solve hard problems.
+
+6. Get some hardware. Perhaps I'll pay for some amazon ec2 instances to run simluations with. They'll run faster, and I may be able to parallelize the testing of various changes.

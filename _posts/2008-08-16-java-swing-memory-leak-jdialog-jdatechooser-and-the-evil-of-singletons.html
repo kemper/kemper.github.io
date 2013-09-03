@@ -1,0 +1,105 @@
+---
+layout: post
+title: ! 'Java Swing memory leak: JDialog, JDateChooser, and the evil of Singleton''s'
+categories:
+- General Agile
+tags: []
+status: publish
+type: post
+published: true
+meta: {}
+---
+I recently solved a mysterious memory leak puzzle in a java swing application that I'm working on. The source of the memory leak was proving elusive, even with people on the team using <a href="http://www.quest.com/jprobe/">JProbe</a> in order to find the source of the leak.
+
+At the root of the problem, the Dialog was too complex and with too much logic to easily pinpoint the problem. Circularly referential object graphs were everywhere. I had to rip out most of the dialog in large chunks until I reduced it down to a simple JDialog, and then considered each possible factor.
+
+I was a little tripped up along the way. Apparently, calling Runtime.getRuntime().gc() doesn't necessarily collect memory, but if push push the JVM to the point of an OutOfMemoryError, it'll do everything in it's power to get all the available memory back. Pushing it the edge was a sure way to get an honest answer.
+
+Normally, when Java memory leaks happen in Swing, the culprit is a listener of some kind. It's easy to register a listener and forget about it, while it continues to point to other objects with a strong reference. It's further complicated by the fact that it's not always obvious when a reference is created, like in the case of defining an anonymous inner class.
+
+In my case I discovered that the culprit of the memory leak was a JDateChooser object that we are using. That object is defined as part of the <a href="http://www.toedter.com/en/jcalendar/index.html">JCalendar api</a>. Specifically, inside the dialog, a PropertyChangeListener was anonymously created and registered to the JDateChooser, creating a circular reference from the JDateChooser and the dialog.
+
+So, what was JDateChooser doing? Sure enough, in the constructor, it was registering a listener with a Swing singleton called MenuSelectionManager. That singleton never dies, and does not releasing the reference so that the garbage collector can do it's magic.
+
+The code in the JDateChooser constructor:
+
+[code lang="java"]
+// Corrects a problem that occured when the JMonthChooser's combobox is
+// displayed, and a click outside the popup does not close it.
+
+// The following idea was originally provided by forum user
+// podiatanapraia:
+changeListener = new ChangeListener() {
+ public void stateChanged(ChangeEvent e) {
+    // do stuff that creates a reference back to the JDateChooser
+ }
+};
+MenuSelectionManager.defaultManager().addChangeListener(changeListener);
+[/code]
+
+I love the comment. It's just too bad that the forum user didn't recommend constructor injection of that manager, which would have allowed me an elegant means of preventing the memory leak without modifying the library.
+
+For instance, I could make a WeakReferenceMenuSelectionManager that stores the listeners using <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/lang/ref/WeakReference.html">WeakReferences</a> - thus allowing the garbage collector to reclaim the objects in the event that there are no other objects with a strong reference to the listener.
+
+Unfortunately, when the maker of JDateChooser realized they were causing memory leaks, they came up with this solution:
+
+[code lang="java"]
+/**
+ * Should only be invoked if the JDateChooser is not used anymore. Due to popup
+ * handling it had to register a change listener to the default menu
+ * selection manager which will be unregistered here. Use this method to
+ * cleanup possible memory leaks.
+ */
+public void cleanup() {
+  MenuSelectionManager.defaultManager().removeChangeListener(changeListener);
+  changeListener = null;
+}
+[/code]
+
+This is better than nothing, but is still far inferior to a WeakReference approach. This is an excellent example of why we shouldn't write code that reaches out and calls a Singleton. statically referencing an object does not allow me to reconfigure the object without changing the source code - something I would prefer not to do in a library. Luckily, the JCalendar api is covered under the LGPL, so at least changing the library was an option.
+
+The better fix was this. First, I create a weak change listener as a proxy around the original change listener.
+
+[code lang="java"]
+public class WeakChangeListenerProxy implements ChangeListener {
+
+    public WeakReference reference;
+
+    public WeakChangeListenerProxy(ChangeListener listener) {
+        this.reference = new WeakReference(listener);
+    }
+  
+    public void stateChanged(ChangeEvent e) {
+        ChangeListener actualListener = (ChangeListener)reference.get();
+        if (actualListener != null) {
+            actualListener.stateChanged(e);
+        }
+    }
+}
+[/code]
+
+Then, In JDateChooser, I changed the constructor like so:
+
+[code lang="java"]
+// The following idea was originally provided by forum user
+// podiatanapraia:
+ChangeListener changeListener2 = new ChangeListener() {
+    // Change listener body
+};
+      
+changeListener = new WeakChangeListenerProxy(changeListener2);
+MenuSelectionManager.defaultManager().addChangeListener(changeListener);
+[/code]
+
+Finally, I wanted to clean up the remaining WeakReference object. Now that the JDateChooser will get garbage collected, I can do that by creating a finalize method.
+
+[code lang="java"]
+protected void finalize() throws Throwable {
+    super.finalize();
+    MenuSelectionManager.defaultManager().removeChangeListener(changeListener);
+}
+[/code]
+
+I posted this solution to the <a href="http://www.toedter.com/forum/post.php?cat=1&fid=3&pid=32&page=1">JCalendar forum</a>, hopefully, it'll get added to the next release. The cleanup() method is not an obvious solution. As a user of a widget api (especially in Java), I wouldn't expect that I need to free up any resources, and indeed, a lot of time and money was wasted with developers looking into this issue.
+
+Oh well, at least I got to have some fun with Weak References.

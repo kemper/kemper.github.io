@@ -1,0 +1,68 @@
+---
+layout: post
+title: An "old school" technique for testing summation
+categories:
+- The Art of Programming
+tags: []
+status: publish
+type: post
+published: true
+meta: {}
+---
+I wrote some tests a few weeks back where I had to sum up a bunch of values on a collection of objects and assert that the summation happened correctly. A naive way to do this is to build the test objects with all the values equal to 1, sum them, and assert that the total is the same as the number of objects created for the test.
+
+[code lang="java"]
+int calculateClaimTotal(List<Claim> claims) {
+        int total = 0;
+        for (Claim claim : claims) {
+                total += claim.getAmount();
+        }
+        return total;
+}
+[/code]
+
+In this example, you could test calculateClaimTotal by creating 3 claims with amounts = 1, and assert that the total is 3.
+
+This may seem sufficient for a simple summation, but it becomes more flawed when the summation becomes based on business rules. Now, if the values to be summed are all 1, you can't differentiate which rules were enforced by looking at the resulting number directly.
+
+[code lang="java"]
+int calculateClaimTotal(List<Claim> claims) {
+        int total = 0;       
+        for (Claim claim : claims) {
+                if (claim.isActive()) {
+                        total += claim.getAmount();
+                }
+        }
+        return total;
+}
+[/code]
+
+Now, we want to be able to differentiate that the active claims are the ones that get summed. This can become a bloated assertion to make. For instance, you can extend the test objects and count invocations on getAmount(). Then, you can assert that only the objects you expected where used to calculate the total.
+
+A much simpler way of asserting that the objects that you expected were the ones that were used is to use amount values that, when summed, always have a distinct result. This is achieved by using numbers that map to distinct bitwise values:
+
+00001 = 1
+00010 = 2
+00100 = 4
+01000 = 8
+10000 = 16
+
+There is no way to add any of these numbers and have them be equal to any other summation of a subset of the numbers. This is because addition of 2 of these numbers is equivalent to an "or" operation on the bits of the numbers:
+
+   00001 = 1
+   00010 = 2
+ +__________
+   00011 = 3
+
+
+This characteristic allows me to identify exactly what claims where used in the summation, because the resulting value could only occur from the values I expect:
+
+Claim 1 is active with value = 1
+Claim 2 is inactive with value = 2
+Claim 3 is active with value = 4
+
+I can assert that calculateClaimTotal will return 5 here, and that 5 will occur if and only if Claim 1 and Claim 3 are the ones used for the summation. Essentially, a bit location set to 1 instead of 0 will uniquely identify the object that the value came from.
+
+I call this an old school testing technique because these days, there is not a lot of bitwise math that occurs in the course of programming. Back in the day, high performance C programmers would use bitwise operation often, and api's such as the win32 api used bitwise math as part of api.
+
+Even in today's fancy world of high level abstraction, sometimes it takes a smooth low level trick like this one to achieve the most succinct code.

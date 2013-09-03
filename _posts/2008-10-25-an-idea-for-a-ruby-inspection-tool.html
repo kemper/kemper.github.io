@@ -1,0 +1,37 @@
+---
+layout: post
+title: An idea for a ruby inspection tool
+categories:
+- The Art of Programming
+tags: []
+status: publish
+type: post
+published: true
+meta: {}
+---
+Working on some ruby code for a little while, I had an idea for a tool that would be useful.
+
+Basically, what I want is an inspection tool that also has a bundle in textmate, so that I can see the history of objects that are created, as well as interactions in a form that is searchable and that quickly shows what really happened. It would be like having debugging on all the time.
+
+The goal of this tool would be to allow developers to view what really happens with the code when it executes. Sometimes finding the source of bugs is difficult because statically analyzing code is not the easiest way to predict the future state of an object, or to predict the interactions between objects. You don't really know what happens until the code executes.
+
+Nor is traditional debugging an efficient way to get the information that you need. You have to set a break-point, add in a line to call the a debugger, or even print out some information in order to answer a question about the actual execution of the code.
+
+What I want is a tool that records a wealth of data about the actual execution of some code, such as when I run a test, or initiate an action from a controller. Then, I would like to be able to filter/query that information to get more precise information.
+
+For the inspection tool, I'd like to know things like:
+
+- See the actual methods and fields of a class or object instance at the beginning and end of code execution
+- See all calls made to an object, or a specific instance of an object
+- See all callers of a specific method of a specific object type or object instance
+- Detect changes in the structure of an individual object that happens, such as methods being added or redefined after the object is initialized
+- View all changes to fields of an object
+- I would like to see the order that objects are created in. I would like to see when all objects of a certain type were created, or objects that respond to a specific method
+- I would like to see all interactions between 2 objects
+- I would like to be able to further scope the search, so that I only see information within the scope of a specific method call
+
+Preferably, I would want to be able to view all of this information after running the code one time. And then be able to enter some search criteria into a form and have it reduce the amount of information to match my search criteria. Then, I can tweak some starting data in a test, and then rerun the test and get a new set of information to query.
+
+I think that most of this information could be obtained by creating a Module to intercept all method sends to every object, and save some data about the context of the call when it's made. Then, a client tool could parse the output, and allow a developer to query it.
+
+I tried to do some googling to find something like this, but all I found were standard debugging tools, which I don't think have the features that I'm looking for. If anyone knows of something that can do what I want, let me know.

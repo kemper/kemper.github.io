@@ -1,0 +1,138 @@
+---
+layout: post
+title: There more to consider than whether to return null
+categories:
+- General Agile
+tags: []
+status: publish
+type: post
+published: true
+meta: {}
+---
+With the <a href="http://andyp-tw.blogspot.com/2008/08/returning-null-considered-dishonest.html">previous</a> <a href="http://www.markhneedham.com/blog/2008/08/16/null-handling-strategies/">discussions</a> about whether or not we should return null from a method, I think that there is a few important points that were missed. I wanted to weigh in one last time, before I personally declare this topic beaten to death.
+
+In the example that was given, it was asked what to do have something like:
+[code lang="java"]
+VendingMachine vendingMachine = new VendingMachine();
+vendingMachine.addMoney(Money.ONE_DOLLAR); // not enough money, drinks cost $1.50
+Drink drink = vendingMachine.getDrink();
+[/code]
+// What now? Oh Crap, we can't have a drink at this point. We didn't put enough money in the machine.
+
+In the case that there isn't enough money, we could have the getDrink() method could return null, return a Drink.NULL. In any case, we are defining an invariant for the use of getDrink(). We are promising that, in the event that getDrink() is called and not enough money was given, we are going to do one of those two things. Alternatively, we are saying that if and only if there is enough money added, will it return a valid drink object.
+
+Also, with this example, the assumption is that we are going to check the <strong>post-condition</strong> of the operation in order to detect failure:
+
+[code lang="java"]
+Drink drink = vendingMachine.getDrink();
+if (drink == null)  // Oh Crap!
+
+or with a null object
+
+Drink drink = vendingMachine.getDrink();
+if (drink.isNull()) // Oh Crap!
+[/code]
+
+Ideally, I don't ever want my code to veer from the happy path. I don't want to ever have my code reach an invalid situation where it cannot return a drink. I also don't want to expend much effort as a developer handling the scenario. I would rather write tests that asserts that it can't happen in relation to the client object.
+
+One such option, is to provide a different invariant scenario - One where we check a <strong>pre-condition</strong>:
+[code lang="java"]
+VendingMachine vendingMachine = new VendingMachine();
+while (vendingMachine.needsMoreMoneyForADrink()) {
+    vendingMachine.addMoney(Money.ONE_DOLLAR);
+}
+Drink drink = vendingMachine.getDrink(); // we know for sure that we have enough money for a drink here
+[/code]
+
+or
+[code lang="java"]
+if (!vendingMachine.needsMoreMoneyForADrink()) {
+    Drink drink = vendingMachine.getDrink();
+}
+[/code]
+
+The invariant is now that if needsMoreMoneyForADrink() returns false, we will always get a drink.
+
+Personally, I like the precondition approach (in this particular example). It reads well, and it adheres to the principle of <a href="http://www.martinfowler.com/bliki/CommandQuerySeparation.html">Command-Query separation</a>. Also, in the post-condition example, null (or a wrapper) is being used to communicate that not enough money has been given to the vending machine, and that more should be added. Personally, I'd like to ask the vending machine if I'm supposed to give more money. Note that situation is similar to an <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/Iterator.html">iterator pattern</a>.
+
+Along the way, Andy referred to using exceptions because they follow the Principle of <a href="http://www.pragprog.com/articles/tell-dont-ask">"Tell, Don't Ask."</a> I don't believe that it qualifies as a good representation of that principle, but I have an example a little later that I believe is better.
+
+Andy's example of throwing an exception when getDrink() is called under conditions when it shouldn't have been raises an important question for me. Should we have a method that fails, and then communicates failure back to the client object (such as with throwing an exception)? Perhaps we should not have a method that is expected to return a drink at all.
+
+In the world of object to object communication, there are only a few ways for an object to respond to the communication of another object, with each having strengths and weaknesses.
+
+1.) You can return a value, or an object reference. Null is the equivalent of reponding with "No, I can't or won't give that to you."
+
+2.) You can return some kind of communication object or value, one that perhaps allows you to communicate a number of message types. I consider a Null object a variation of this. You could also return an enum, where each enum value represents a different type of message.
+
+3.) You could set some kind of global variable to hold a message - something that can be read by the client object. This is generally considered terrible OO, but I see it from time to time in the form of Singletons.
+
+4.) In languages like Java, you can throw an exception. Exceptions generally signify an exceptional error situation. Exceptions can be handled, but if not, will continue to bubble throughout the code, interrupting every called frame, finally interrupting the flow of execution if not handled.
+
+5.) You can respond with a method call. This is the standard "Proper" way of having objects communicate. Of the different message/communication types available to object, this one is the richest and most intentional (most explicit). You can send a message (a method call) and send parameters as details with the message.
+
+I generally avoid using exceptions to communicate between objects. I try to reserve them for really exceptional situations. I will spend time looking at important code and deciding on how to do it well, but many, many time before, I have written methods or functions that just return null, and I also wrote the code that used it. It's simple, and people who look at that kind of logic will be familiar with it, so it's not going to be a surprise.
+
+Anyway, I wanted to weigh in on a different way of "handling nulls." I created a sample solution to the VendingMachine::getDrink() dilemma; one that doesn't assume that there is a getDrink() method at all. It's an example of the VendingMachine responding to the client object (a Person) with a richer object communication (and a better example of "Tell, don't ask" than using exceptions). Imagine that the interaction begins with someone calling Person::getARefreshingDrink() and passing in a VendingMachine.
+
+[code lang="java"]
+public class Person {
+    VendingMachine vendingMachine;
+   
+    void mustAddMoreMoney() {
+        vendingMachine.addMoney(Money.ONE_DOLLAR, this);
+    }
+
+    public void getARefreshingDrink(VendingMachine machine) {
+        this.vendingMachine = machine;
+        vendingMachine.addMoney(Money.ONE_DOLLAR, this);
+    }
+   
+    void enoughMoneyGiven() {
+        vendingMachine.enterDrinkSelection(DrinkType.COKE, this);
+    }
+   
+    void givePersonChangeAndADrink(Money change, Drink drink) {
+        // let's guzzle that drink and pocket the change
+    }
+}
+
+
+public class VendingMachine {
+    private static final Money COST_PER_DRINK = Money.valueOf("$1.50");
+    private Money totalMoney = Money.ZERO;
+
+    public void addMoney(Money money, Person person) {
+        totalMoney = totalMoney.add(money);
+        if (notEnoughMoney()) {
+            person.mustAddMoreMoney();
+        } else {
+            person.enoughMoneyGiven();
+        }
+    }
+   
+    public void enterDrinkSelection(DrinkType type, Person person) {
+        if (notEnoughMoney()) {
+            person.mustAddMoreMoney();
+        } else {
+            person.givePersonChangeAndADrink(getChange(), getDrinkFromType(type));
+            totalMoney = Money.ZERO;
+        }
+    }
+
+    private Drink getDrinkFromType(DrinkType type) {
+        return new Drink(type);
+    }
+
+    private boolean notEnoughMoney() {
+        return COST_PER_DRINK.greaterThan(totalMoney);
+    }
+
+    private Money getChange() {
+        return totalMoney.minus(COST_PER_DRINK);
+    }
+   
+}
+[/code]
+
+I'm not arguing that this is optimal either, but I got other blog posts to write, and stuff to do. It's meant to represent a way of having objects interact in a rich manner. I'm sure you can imagine other ways to make this better, such as moving the Person method definition into a "Drinker" interface.

@@ -1,0 +1,32 @@
+---
+layout: post
+title: ! 'Cognitive Benefit of TDD: Confirmation Driven Development?'
+categories:
+- General Agile
+tags: []
+status: publish
+type: post
+published: true
+meta: {}
+---
+I recently read an blog post[1] describing a cognitive justification for test driven development. I think the topic is interesting. In doing TDD, there are a variety of reasons for why we write tests first, and it isn't always to ensure correctness over time.
+
+Certainly, there are tests that are meant for ensure that changes don't break earlier functionality. For instance, If I'm writing a sorting algorithm, unit tests will prevent it from not sorting at some point. If I use unit tests to assert the existence of explicit business rules against domain objects, I am trying to prevent those rules from being broken in the future.
+
+However, there is a behavioral point to TDD where a developer breaks down a larger goal into quickly attainable and testable tasks, and then completes each task in order to complete the larger goal. The tests provide a clear stopping point for the given task. Usually, writing automated tests allows us to recheck our previous tasks to ensure that we haven't undone them. The automation of tests leverages the speed of computers to make rechecking those assertions faster and more reliably correct than a human could do it.
+
+There is an implied assumption here. The general assumption is that automation of those test will save us time. It is assumed that it will save us time either in rechecking our assertions, or save us time that would be lost if a defect occurs.
+
+I have found that there are times where coding an automated test is too costly. It's partially a personal judgment, but it is also influenced by other factors such as the culture of the team or the company that I am working with. I try to do a quick cost/benefit decision for testing to determine if the time spent on the test will really pay off. As much as I value automated tests, if the cost seems to significantly outweigh the value, I don't automate.
+
+So, I believe that the cognitive and behavioral benefits of testing first, and the automation of the tests to be very different considerations. Even when I don't write automated tests, I still decompose my larger goal into achievable tasks, and test assertion manually. At certain points along the way, I will manually retest all or many of the previous assertions.
+
+I find that this tends to happen with user interfaces. The user interface component might have behavior that is difficult to automatically test in a timely manner. For instance, a "drag and drop" feature where the user can drag items from one box to another. It's such a user centric feature, that you really have to setup the UI widget, play with it, and verify that it's behavior is acceptable.
+
+Even in development environments where there aren't any automated tests, you will still often see developers using printouts or some other immediate feedback mechanism to take "baby steps" through their work. I think that even developers that haven't realized the benefit of automating tests are still essentially doing a rudimentary form of TDD, something more like "Confirmation Driven Development" perhaps.
+
+Many developers do not develop with some kind of incremental confirmation that they are building the software correctly; They will spend days working on a feature but not test it at all. After a few days, they experiment with the application, see what breaks, and then will chase down the various defects. I would say that's a mistake of a junior developer, but I've seen some very experienced people develop like this as well. Often, these people have a mistaken belief that they are optimizing their time. In some situations, this behavior comes from the lack of continuous integration, but I've also seen the behavior happen when feedback cycles are incredibly long (say, it takes a minute to get the application into a state that allows the developer to test the feature).
+
+Beginning your work with an automated test is the best initial approach. However, if you find that you're in a situation not conducive to automation, don't give up on taking small steps and asserting that each step worked, somehow.
+
+[1] http://www.m3p.co.uk/blog/2008/06/15/test-driven-development-a-cognitive-justification

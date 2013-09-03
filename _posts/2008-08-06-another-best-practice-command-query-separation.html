@@ -1,0 +1,70 @@
+---
+layout: post
+title: ! 'Another best practice: Command query separation'
+categories:
+- Best Practices
+tags: []
+status: publish
+type: post
+published: true
+meta: {}
+---
+I came across some code the other day that made me wish more people were aware of the concept of <a href="http://www.martinfowler.com/bliki/CommandQuerySeparation.html">Command Query Separation.</a> It's a great default behavior for developers to have and results in code that support more reuse.
+
+Since I think someone out there would be upset if I posted the actual code, here is something else I made up:
+
+[code lang="java"]
+class SomeForm extends Form {
+
+    // bunch of other Form suff
+
+    void validate() {
+        List errors = getValidationErrors();
+        okButton.setEnabled(errors.size() == 0);
+    }
+
+}
+[/code]
+
+Looks simple enough. I've got a form, and when everything is valid, the button becomes enabled and the user can move on to something else. The getValidationErrors() method gets me a list of errors if the form has any error. Oh, but wait, it does more:
+
+[code lang="java"]
+List getValidationErrors() {
+    List errors = new List();
+    this.menu = new Menu();
+    if (!email.isValid()) {
+        errors.add(INVALID_EMAIL);
+        this.menu.add(new MenuItem(IMPORT_EMAIL_FROM_OTHER_ACCOUNT));
+    }
+    if (!name.isValid()) {
+        errors.add(INVALID_NAME);
+    }
+    if (!address.isValid()) {
+        errors.add(INVALID_ADDRESS);
+        this.menu.add(new MenuItem(LOOKUP_ADDRESS_ON_MAP));
+    }
+    return error;   
+}
+[/code]
+The code's contrived, and only loosely based on what I saw. What I saw was much more egregious. The point is that the method getValidationErrors() is building a menu and collecting validation errors.
+
+What if I want to find out if everything is valid later on? Well, I'll be rebuilding the menu again. It get worse when you see the code get more complex like so:
+[code lang="java"]
+
+    if (!email.isValid()) {
+        errors.add(INVALID_EMAIL);
+        this.menu.add(new MenuItem(IMPORT_EMAIL_FROM_OTHER_ACCOUNT));
+    } else {
+        if (email.matchesBusinessRule()) {
+            refreshAdvertisementAboveForm();
+        }
+    }
+[/code]
+
+Sigh. I just want to know if the form is valid. I don't want the advertisement to refresh above the form. What I really want is a getValidationErrors() and a updateMenu() and a refreshAdvertisementAccordingToRules(). Alternatively, I would have accepted a getValidationErrors() and a doABunchOfUiChangesInResponseToFormValidation().
+
+As you may have guessed, the code that I saw was not tested either.
+
+I have a suspicion that some developers (even some experienced developers) create code like this because they feel that they are writing the least amount of code possible (you save lines by not creating more methods!). Developer awareness aside, probably the top reason this tends to happen is lack of collective code ownership. A developer has to add a feature to a part of the system that "belongs" to someone else, so they add they try to add as few lines or if-statements as possible. They see that there is logic that they need, and they see that it is executed at the time they want it to execute their code, so they pile on their logic and finish their task.
+
+From the example I've shown, it may look like a small evil, but the amount of if-else statement and total coupled logic tends to build up quick.

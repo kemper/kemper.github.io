@@ -1,0 +1,273 @@
+---
+layout: post
+title: Getting rid of switch statements with Java Enums
+categories:
+- The Art of Programming
+tags: []
+status: publish
+type: post
+published: true
+meta: {}
+---
+I recently saw an interesting and polymorphic way to get rid of using a case statement when using enums. This is possible by defining a method for each instance of an enum.
+
+I'm sure that you have seen code like this:
+
+[code lang="java"]
+
+enum Friend {
+    Joey, Chandler;
+}
+
+[/code]
+
+And then somewhere in the code, you might see:
+
+[code lang="java"]
+
+class SomeObjectThatNeedsToKnowBestFriends {
+
+    void doSomethingWithBestFriends() {
+        for (Friend friend : Friend.values()) {
+            doSomething(bestFriend(friend));
+        }
+    }
+
+    Friend bestFriend(Friend friend) {
+         switch (friend) {
+             case Joey: return Friend.Chandler;
+             case Chandler: return Friend.Joey;
+             default: throw new RuntimeException("This person has no friend");
+         }
+    }
+}
+
+[/code]
+
+This is a common smell in a code base where client code has logic that should be better encapsulated. Now, whenever someone adds a friend, they are going to have to search for references on Friends and add a new entry, or they are going to get a RuntimeException from the switch statement. In a well tested codebase, there is probably going to be a unit test that asserts that all Friends have best friends. In any case, the switch statement in the client object code is not great from an OO standpoint and it creates a maintainability issue.
+
+The first refactoring is to move all Friend related logic to the Friend enum where it belongs.
+
+[code lang="java"]
+
+enum Friend {
+    Joey, Chandler;
+
+    Friend bestFriend() {
+         switch (this) {
+             case Joey: return Chandler;
+             case Chandler: return Joey;
+             default: throw new RuntimeException("This person has no friend");
+         }
+    }
+
+}
+
+[/code]
+
+Now, we can just ask the Friend who their best friend is.
+
+[code lang="java"]
+
+Joey.bestFriend(); --> returns Chandler;
+
+[/code]
+
+Nice. Still, I'm not wild about that switch statement. Developers still have to know to update it, and really, I'd rather not even have to throw an exception because it was misused. It would be better if the structure of the code did not allow misuse.
+
+Here is an example of how to do this:
+
+[code lang="java"]
+
+enum Friend {
+    Joey {
+        Friend bestFriend() { return Chandler; }
+    },
+    Chandler {
+        Friend bestFriend() { return Joey; }
+    }
+    abstract Friend bestFriend();
+}
+
+[/code]
+
+Then,
+
+[code lang="java"]
+
+Joey.bestFriend(); --> returns Chandler;
+
+[/code]
+
+Great, now we know that when someone adds a new friend, they will immediately be confronted with having to supply a best friend. My only issue with this approach is that all the method definitions become verbose when you introduce many methods like this. I tried different approaches to solving this problem, but due to the enums referencing each other, I was not able to do a different approach.
+
+Here is an example of what you can't do:
+
+[code lang="java"]
+
+enum Friend {
+    Joey (Chandler),
+    Chandler(Joey)
+
+    final Friend bestFriend;
+
+    Friend(Friend bestFriend) {
+        this.bestFriend = bestFriend;
+    }
+
+    Friend bestFriend() {
+        return bestFriend;
+    }
+}
+
+[/code]
+
+This won't work because you can't reference Chandler in the enum definition for Joey. The Chandler Enum hasn't been defined yet, so this won't even compile. However, you can "trick" the compiler by fully referencing Chandler using Friend.Chandler;
+
+[code lang="java"]
+
+enum Friend {
+    Joey (Friend.Chandler),
+    Chandler(Joey)
+
+    final Friend bestFriend;
+
+    Friend(Friend bestFriend) {
+        this.bestFriend = bestFriend;
+    }
+
+    Friend bestFriend() {
+        return bestFriend;
+    }
+}
+
+[/code]
+
+However, the result is not what we want:
+
+Joey.bestFriend(); --> null
+Chandler.bestFriend(); --> Joey
+
+Even though I can reference the other enum instance this way, it resolves to null. The reason lies in the fact that when the Enum is compiled, each instance is a static final field, and initialized in a static block. Here is a snippet of the generated code:
+
+[code lang="java"]
+ 
+    public static final Friend Joey;
+    public static final Friend Chandler;
+    final Friend bestFriend;
+    private static final Friend ENUM$VALUES[];
+
+    static
+    {
+        Joey = new Friend("Joey", 0, Chandler);
+        Chandler = new Friend("Chandler", 1, Joey);
+        ENUM$VALUES = (new Friend[] {
+            Joey, Chandler
+        });
+    }
+
+[/code]
+
+Interestingly, I can write a program that tries the fully qualified name for explicit static constants, and it works:
+
+[code lang="java"]
+
+public class StaticEnumClass {
+
+    static final String foobar = "foo" + StaticEnumClass.bar;
+    static final String bar = "bar";
+   
+    public static void main(String[] args) {
+        System.out.println(foobar); // prints out "foobar"
+    }
+   
+}
+
+[/code]
+
+But if I use a static initialization, it doesn't:
+
+[code lang="java"]
+
+public class StaticEnumClass {
+
+    static final String foobar;
+    static final String bar;
+   
+    static {
+        foobar = "foo" + StaticEnumClass.bar;
+        bar = "bar";
+    }
+   
+    public static void main(String[] args) {
+        System.out.println(foobar); // prints "foonull"
+    }
+   
+}
+
+[/code]
+
+Interesting. The compiler is smart enough to resolve the correct value when you don't use a static initialization block. Back to my original example with Friends. The next attempt was to create an anonymous constructor (actually, an instance initializer) for the enum instances and see if I could get what I want:
+
+[code lang="java"]
+
+enum Friend {
+    Joey {
+        {
+            bestFriend = Chandler;
+        }
+    },
+    Chandler {
+        {
+            bestFriend = Joey;
+        }
+    }
+
+    Friend bestFriend;
+
+    Friend bestFriend() {
+        return bestFriend;
+    }
+}
+
+[/code]
+
+I had to remove the final from bestFriend, since I'm inializing the value when the object is instantiated using an instance initializer. This compiles, and seems like an okay approach. My hope was that the references to other enum types would get resolved in much the same manner as in the case of creating a method that returns each one. Interestingly, this doesn't happen.
+
+[code lang="java"]
+
+Joey.bestFriend(); --> null
+Chandler.bestFriend(); --> Joey
+
+[/code]
+
+The reason is that even though I am using an instance initializer, it's being called from a static block since the instances are created in a static block. Turns out to be a naive attempt. Here is what it ends up looking like when the enum gets generated as a class:
+
+[code lang="java"]
+
+    static
+    {
+        Joey = new Friend("Joey", 0) {
+
+           
+            {
+                bestFriend = Friend.Chandler;
+            }
+        }
+;
+        Chandler = new Friend("Chandler", 1) {
+
+           
+            {
+                bestFriend = Friend.Joey;
+            }
+        }
+;
+        ENUM$VALUES = (new Friend[] {
+            Joey, Chandler
+        });
+    }
+
+[/code]
+
+Oh well. That's as far as my experimentation went. I'm satisfied that I can at least create an anonymous subtype of an enum that returns the correct value, but if anyone has any ideas on how to do this in a cleaner way, let me know.

@@ -1,0 +1,66 @@
+---
+layout: post
+title: Programming by Contract considered excessive
+categories:
+- The Art of Programming
+tags: []
+status: publish
+type: post
+published: true
+meta: {}
+---
+Recently, Andy Palmer post a <a href="http://andyp-tw.blogspot.com/2008/08/returning-null-considered-dishonest.html">blog article called returning null considered dishonest.</a>
+
+I felt that the topic started to go down the road of enforcing a contract in order to prevent nulls. Checked exception are an example of explicitly adding new behavior to the contract. The contract details a response to certain parameters in the form an exception.
+
+Taking a step away from checked exceptions, you have unchecked exceptions. Unchecked exception that are typed are especially pointless, as they weren't declared in the first place, and generally shouldn't be explicitly handled. If you do want to make contract enforcement with unchecked exceptions, you can throw RuntimeExceptions or do an Assert.true() at the start of the method to make sure that a method is called with then needed preconditions.
+
+My issue is that you're adding behaviour - behavior that was probably added somewhere else already. Every line of code added incurs an extra bit of cost in terms of maintenance. Super defensive coding strategies should be justified due to the merits of the given situation, but not used as a default behaviour.
+
+Null's are okay when they are not meant to be handed out as a meaningful response. Once you try to use null values to convey a value or a meaning, then you start seeing a proliferation of nulls and null checks.
+
+For instance, I'm not advocating this:
+[code lang="java"]
+public Object foo(Object parameter) {
+   if (parameter == null) {
+      return null;
+   }
+   // do stuff
+}
+
+Object result = foo(parameter);
+if (result == null) {
+   // handle error situation
+}
+[/code]
+
+Nor am I advocating this:
+
+[code lang="java"]
+public Object foo(Object parameter) {
+   Assert.notNull(parameter);
+   // do stuff
+}
+
+try {
+    Object result = foo(parameter);
+} catch(Exception e) {
+    // handle error
+}
+[/code]
+
+I'm essentially advocating this:
+
+[code lang="java"]
+public Object foo(Object parameter) {
+   // just do stuff, and trust the other developers to be good citizens
+}
+
+Object result = foo(parameter);
+[/code]
+
+Don't check for null, don't throw exceptions. Just make sure that nulls don't occur at the entry point to the system. Most of the time, you should just write your method to do stuff and make sure that the error conditions are handled in one place as early as possible to their introduction into the system, such as when the user enters some data.
+
+Most code bases are not published to the public. There is a big difference between published api's and internal code bases. With a public api, you have to create more of a contract, because you want to give your providers something that they can depend on. There are too many consumers for immediate communication and collaboration. In an internal codebase, you are your own consumer and supplier.
+
+My point here is that I disagree with adding more code complexity to fix a problem that is generally a behavioral issue. Having to handle every possible unwanted condition of a method parameter becomes a method tax, creates duplication, and results in a lot of tests that aren't testing the interesting stuff.

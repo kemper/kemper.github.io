@@ -1,0 +1,26 @@
+---
+layout: post
+title: When will we have a real multi-user windowing system
+categories:
+- General
+tags: []
+status: publish
+type: post
+published: true
+meta: {}
+---
+I once worked on a VNC type application, where the purpose was to allow some number of users to share any desktop application to a group of people (part of the allure is that windows applications could be shared to Linux users). The features that were meant to set it apart from the typical desktop sharing application like VNC was that it would enhance collaboration amongst the users.
+
+It was a fun application to write - It had a Java Swing front end with JNI to use portions of the win32 API and X-Windows API, and we wrote a video and audio server to distribute the view of the application and allow the users to talk to each other in on online group phone call while they were using the application.
+
+There was one desired feature that we could not implement. We wanted to allow users to simultaneously enter text, and simultaneously control their own mouse cursor to interact with the application. We were completely blocked on this feature because it goes against a major assumption of all major operating systems - that one user will use the system at a time. For instance, it's assumed that one window will have focus at a time. It is also assumed that there is only one mouse cursor at a time. There are even more subtle issues that come up, such as there being only one copy and paste buffer.
+
+At the time, I was disappointed, but I didn't dwell on it too much. I figured that that level of multi-user collaboration would only service a very small niche market, and that it wasn't so bad that we didn't have the possibility of better collaboration.
+
+Fast forward to today. I pair program most of the time, and I find myself longing for an environment that would allow me and my pair to collaborate in different ways. It's standard pair programming, where we both work on the same window, and have to share the same keyboard and mouse input (preferably with 2 mice and 2 keyboards). So what do you do when one person has to check email, or one person decides to research an issue online, or otherwise engage in a task that is not the same as the other pair member? Typically, each person will have a laptop that they can use for these situations, but that causes the person to separate themselves from the primary work environment. Sharing information will have to done by sending an email or putting a file on a shared drive, or having the other person look at information on the laptop's screen. What about spiking a problem side by side, where each pair tries two similar but different approaches to solving a programming problem? I would prefer to collaborate with someone in the same environment, where we can do some different tasks in parallel, and can share windows, applications, and data in the same desktop environment.
+
+I think that it would be interesting to expand this idea even further. What if an entire team worked in the same environment, on the same desktop? Each person could have a portion of a huge desktop, and people in a team could choose to collaborate with each other in a very fluid fashion by putting their desktop spaces close together. It would be an interesting experiment in collaboration applied to software development.
+
+Even if multiple simultaneous mouse and keyboard input were generally possible in operating systems, there would still likely be a lot of complex concurrency issues for developers, such as making sure that servers bind to different ports and write out to different files. It's likely that once popular operating systems generally allow the multi-user features I mentioned before, that it would still be preferable to have isolated machines that interact through collaborative software rather then have everyone actually use the same machine.
+
+I've seen software that allows sharing of a the mouse and keyboard across machines, and sharing the copy and paste buffer, but the purpose was to allows one person to connect 2 machines and use them like an extended desktop. Perhaps software like this could be tailored for better collaboration for pair programming or developers on a team not pairing.

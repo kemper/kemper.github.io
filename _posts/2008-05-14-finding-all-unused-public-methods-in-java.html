@@ -1,0 +1,24 @@
+---
+layout: post
+title: Finding all Unused Public Methods in Java
+categories:
+- General
+tags: []
+status: publish
+type: post
+published: true
+meta: {}
+---
+Recently I had to do some unpleasant code cleanup work.
+
+I'm currently working on a legacy database using Hibernate. Along the way, some of the developers decided to generate the mappings for some of the tables instead of writing the mappings only for the columns that they need. The result is that as we reach the release date, we have a bunch of mapped fields that are not used. There were over 800 mapped fields in the code base, and my job was to manually search for references on the those fields and see which ones could be deleted.
+
+I had no desire to spend some number of days tracing the usage of over 800 values in a codebase, so I did some googling on whether a tool is out there that can help me. In particular, I wanted something the would scan the code base, and find usages on all public methods in a code base.
+
+I found a bunch of forums where people debated whether such a tool should exist. I found several tools that will point out unused private methods. There are even tools that generate dependency graphs, which, at some point probably know what methods are getting called and which ones aren't. However, I did not find anything that would just list unused public methods.
+
+My next idea was that I could write an eclipse plugin. After all, eclipse has the logic built in for finding usages on one method, so it seemed like I should just be able to ask it to give me a syntax tree of some kind that I can traverse, calling that function on all the methods. On the plus side, it looks like eclipse has all the parts that I need and shouldn't take a lot of time to write. On the downside, I've never written an eclipse plugin, and the effort looked nontrivial as a first time effort.
+
+So, I put my head down and turned myself into a usage finding machine for 2 days. It sucked.
+
+If you know of a tool that does this let me know, otherwise, I may take a stab at writing an eclipse plugin that does it.

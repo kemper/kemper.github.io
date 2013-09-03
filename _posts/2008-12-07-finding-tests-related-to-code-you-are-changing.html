@@ -1,0 +1,30 @@
+---
+layout: post
+title: Finding tests related to code you are changing
+categories:
+- General Agile
+tags: []
+status: publish
+type: post
+published: true
+meta: {}
+---
+Often, when working on a well tested codebase, you find that you want to know what tests may exist that test the code you are going to modify.
+
+Often a quick search on usages of a method or class is sufficient. You look at the tests briefly to see what is going on, and then you make a new test to assert the new behavior that is going to be added.
+
+Sometimes, when there are a lot of tests, I just prefer to remove the code I'm going to modify, and see what tests fail.
+
+This technique provides some quick and useful information. For instance:
+
+<ol>
+<li>What tests were written that test the code? Are there any applicable tests?</li>
+<li>Are there other tests that implicitly test the code and should not?</li>
+<li>Are the current tests testing all the conditions?</li>
+<li>Is there a test that no longer applies?</li>
+<li>Is there a test who's expectation are changing? That test can be modified instead of writing a new test.</li>
+</ol>
+
+This approach tends to be practical in the case of unit tests, and perhaps a few integration tests that you may know are related. Otherwise, it becomes too expensive to run a long running suite.
+
+An additional benefit is that if you already know of some tests that should be testing some code, you may find a test that meant to test the logic, but for some reason was always passing.
