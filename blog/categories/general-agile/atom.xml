@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Kris Kemper]]></title>
-  <link href="http://kemper.github.io/atom.xml" rel="self"/>
+  <title><![CDATA[Category: General Agile | Kris Kemper]]></title>
+  <link href="http://kemper.github.io/blog/categories/general-agile/atom.xml" rel="self"/>
   <link href="http://kemper.github.io/"/>
   <updated>2013-09-07T11:39:19-04:00</updated>
   <id>http://kemper.github.io/</id>
@@ -22,37 +22,62 @@
   <strong>I believe in Agile software development.</strong> There are many ways to structure a project and still call it Agile. Most importantly, there has to be short feedback cycles throughout the system and adaptation to that information. However, most projects will benefit from many technical principles that are typical of Extreme Programming.
 </p>
 
+
+
+
 <p>
   <strong>I believe in TDD.</strong> Test driving code clarifies the task at hand, and provides continuous confirmation that your code works in small parts. It allows you to refactor with confidence, and reshape your codebase throughout it’s life.
 </p>
+
+
+
 
 <p>
   <strong>I believe in Continuous Integration.</strong> This implies a continuous integration server that run tests against integrated code. This also means avoiding patterns of reduced integration with other people, such as long lived code branches.
 </p>
 
+
+
+
 <p>
   <strong>I believe in Pair Programming.</strong> The benefits are substantial. Pairing results in better developers, a better codebase, better thought out solutions, higher productivity, and a real team of people.
 </p>
+
+
+
 
 <p>
   <strong>I believe in Empowered Teams.</strong> People who function as cogs in the machine cannot contribute to their fullest. Build a team, make them capable of their own decisions, support them, and let them perform.
 </p>
 
+
+
+
 <p>
   <strong>I believe in Frequent Releases.</strong> Frequent releases results in smoother releases, and a greater dynamism to market or client needs.
 </p>
+
+
+
 
 <p>
   <strong>I believe in being a General Technologist.</strong> Developers should not over-specialize to the point that they can’t deliver software without several other specialists. It’s better for most team members to understand and be proficient at in all areas of software delivery, with a few specialists being an added bonus to the quality and direction of the product.
 </p>
 
+
+
+
 <p>
   <strong>I believe in Simplicity.</strong> Excessive complexity is too common in software development. While some complexity is unavoidable, I favor simpler solutions, simpler tools, and simpler products.
 </p>
 
+
+
+
 <p>
   Above all, <strong>I believe in high quality, well crafted software.</strong>
 </p>
+
 ]]></content>
   </entry>
   
