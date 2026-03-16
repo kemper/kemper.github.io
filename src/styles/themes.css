@@ -1,0 +1,19 @@
+/* Nordic: dark, cool tones, minimal */
+[data-theme="nordic"] {
+  --bg: #2e3440;
+  --surface: #3b4252;
+  --text: #d8dee9;
+  --text-bright: #eceff4;
+  --accent: #88c0d0;
+  --accent-hover: #8fbcbb;
+  --heading: #81a1c1;
+  --border: rgba(216, 222, 233, 0.08);
+  --card-bg: rgba(0, 0, 0, 0.15);
+  --card-hover: rgba(136, 192, 208, 0.1);
+  --font: "IBM Plex Mono", "SF Mono", Menlo, monospace;
+  --font-size: 14px;
+  --heading-size: 12px;
+  --name-size: 24px;
+  --radius: 6px;
+  --line-height: 1.75;
+}

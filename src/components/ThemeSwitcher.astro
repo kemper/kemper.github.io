@@ -1,0 +1,39 @@
+
+<div class="theme-switcher" id="theme-switcher">
+  <span>Theme:</span>
+  <button class="theme-btn" data-theme="terminal">Terminal</button>
+  <button class="theme-btn" data-theme="midnight">Midnight</button>
+  <button class="theme-btn" data-theme="nordic">Nordic</button>
+  <button class="theme-btn" data-theme="phosphor">Phosphor</button>
+  <button class="theme-btn" data-theme="slate">Slate</button>
+  <button class="theme-btn" data-theme="obsidian">Obsidian</button>
+  <button class="theme-btn" data-theme="fjord">Fjord</button>
+  <button class="theme-btn" data-theme="carbon">Carbon</button>
+  <button class="theme-btn" data-theme="evergreen">Evergreen</button>
+  <button class="theme-btn" data-theme="void">Void</button>
+</div>
+
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', function() {
+    var buttons = document.querySelectorAll('.theme-btn');
+    var html = document.documentElement;
+
+    function setTheme(theme) {
+      html.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
+      buttons.forEach(function(btn) {
+        btn.classList.toggle('active', btn.getAttribute('data-theme') === theme);
+      });
+    }
+
+    buttons.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var theme = btn.getAttribute('data-theme');
+        if (theme) setTheme(theme);
+      });
+    });
+
+    var saved = localStorage.getItem('theme') || 'terminal';
+    setTheme(saved);
+  });
+</script>

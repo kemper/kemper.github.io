@@ -1,0 +1,62 @@
+---
+import Base from "../layouts/Base.astro";
+---
+
+<Base title="Projects - Kris Kemper">
+  <h2>Projects</h2>
+
+  <section class="project">
+    <h3>mAInifold</h3>
+    <p>
+      A browser-based CAD tool designed for AI-driven
+      3D modeling. Write JavaScript code, get instant
+      3D geometry. No backend, no installs. Built on
+      <a href="https://github.com/elalish/manifold">manifold-3d</a>
+      for fast WASM boolean operations, Three.js for
+      rendering, and CodeMirror for the editor.
+    </p>
+    <p>
+      The key idea is a <code>window.mainifold</code>
+      console API that lets AI agents create, validate,
+      and iterate on designs programmatically. You can
+      save multiple design variations and compare them
+      in a gallery view, which is useful for AI
+      workflows that generate N variations for human
+      review.
+    </p>
+    <p><a href="/mainifold/">Run mAInifold &gt;</a></p>
+  </section>
+
+  <hr class="divider" />
+
+  <section class="project">
+    <h3>openscad_projects</h3>
+    <p>
+      3D modeling projects built in OpenSCAD, a
+      programmatic CAD tool. Functional designs meant
+      for 3D printing. The kind of hands-on fabrication
+      work that eventually led me to build mAInifold.
+    </p>
+    <p><a href="https://github.com/kemper/openscad_projects">View source &gt;</a></p>
+  </section>
+
+</Base>
+
+<style>
+  .project {
+    margin-bottom: 1em;
+  }
+
+  .project h3 {
+    margin-bottom: 0.8em;
+  }
+
+  code {
+    font-family: var(--font);
+    font-size: 0.9em;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    padding: 0.1em 0.4em;
+    border-radius: 3px;
+  }
+</style>

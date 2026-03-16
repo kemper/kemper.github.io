@@ -1,0 +1,154 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  min-height: 100vh;
+}
+
+html {
+  background: var(--bg);
+}
+
+body {
+  font-family: var(--font);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  color: var(--text);
+  background: var(--bg);
+  display: flex;
+  justify-content: center;
+  padding: 48px 24px;
+  transition: background 0.3s, color 0.3s;
+}
+
+.wrapper {
+  width: 100%;
+  max-width: 600px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 48px 44px;
+  box-shadow:
+    0 0 60px rgba(0, 0, 0, 0.08),
+    0 4px 30px rgba(0, 0, 0, 0.15);
+  transition: background 0.3s, box-shadow 0.3s;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+a:hover {
+  color: var(--accent-hover);
+}
+
+h1 {
+  font-family: var(--font);
+  font-size: var(--heading-size);
+  font-weight: normal;
+  line-height: 1.8;
+  color: var(--text-bright);
+}
+
+h2 {
+  font-family: var(--font);
+  font-size: var(--heading-size);
+  font-weight: normal;
+  color: var(--heading);
+  margin-bottom: 1em;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+h3 {
+  font-family: var(--font);
+  font-size: var(--font-size);
+  font-weight: normal;
+  color: var(--accent-hover);
+}
+
+p {
+  margin-bottom: 1.2em;
+  text-align: left;
+}
+
+p:last-child {
+  margin-bottom: 0;
+}
+
+nav {
+  margin-bottom: 2.5em;
+  padding-bottom: 1.5em;
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+}
+
+nav ul {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  gap: 2em;
+}
+
+nav a {
+  color: var(--text);
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  transition: color 0.15s;
+}
+
+nav a:hover {
+  color: var(--accent);
+}
+
+section {
+  margin-bottom: 2.5em;
+}
+
+footer {
+  margin-top: 3em;
+  padding-top: 2em;
+  border-top: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--text);
+  opacity: 0.5;
+  text-align: center;
+}
+
+footer a {
+  color: var(--text);
+}
+
+footer a:hover {
+  color: var(--accent);
+  opacity: 1;
+}
+
+.divider {
+  border: none;
+  height: 1px;
+  background: var(--border);
+  margin: 2em 0;
+}
+
+@media (max-width: 600px) {
+  body {
+    padding: 16px;
+  }
+
+  .wrapper {
+    padding: 32px 20px;
+    font-size: 13px;
+  }
+
+  nav ul {
+    gap: 1.2em;
+  }
+}

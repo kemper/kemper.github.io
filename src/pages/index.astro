@@ -1,0 +1,102 @@
+---
+import Base from "../layouts/Base.astro";
+---
+
+<Base>
+  <main>
+    <section class="hero">
+      <h1 class="name">Kris Kemper</h1>
+      <p class="tagline">Software Engineer &middot; Atlanta, GA</p>
+    </section>
+
+    <hr class="divider" />
+
+    <section>
+      <p>
+        Twenty years building software, from consulting
+        and startups to platforms serving thousands of
+        engineers.
+      </p>
+      <p>
+        These days I build with AI agents as my primary
+        tools. Professionally, I'm most interested in developer experience and
+        AI-augmented workflows. Personally, I love 3d printing and I'm experimenting with ways to leverage AI for 3d modelling
+      </p>
+    </section>
+
+    <hr class="divider" />
+
+    <section>
+      <h2>Projects</h2>
+      <div class="projects">
+        <a href="/mainifold/" class="project-card">
+          <span class="project-name">mAInifold</span>
+          <span class="project-desc">AI-driven 3D CAD in the browser</span>
+        </a>
+<a href="https://github.com/kemper/openscad_projects" class="project-card">
+          <span class="project-name">openscad_projects</span>
+          <span class="project-desc">Programmatic 3D models for printing</span>
+        </a>
+      </div>
+    </section>
+  </main>
+</Base>
+
+<style>
+  .hero {
+    margin-bottom: 0;
+    text-align: center;
+  }
+
+  .name {
+    font-size: var(--name-size);
+    letter-spacing: 0.05em;
+    color: var(--heading);
+    margin-bottom: 0.3em;
+  }
+
+  .tagline {
+    color: var(--text);
+    opacity: 0.5;
+    font-size: 13px;
+    margin: 0;
+    text-align: center;
+  }
+
+  .projects {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75em;
+  }
+
+  .project-card {
+    display: block;
+    padding: 1em 1.2em;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    transition: border-color 0.15s, background 0.15s;
+  }
+
+  .project-card:hover {
+    border-color: var(--accent);
+    background: var(--card-hover);
+  }
+
+  .project-name {
+    display: block;
+    color: var(--accent);
+    margin-bottom: 0.15em;
+  }
+
+  .project-card:hover .project-name {
+    color: var(--accent-hover);
+  }
+
+  .project-desc {
+    display: block;
+    color: var(--text);
+    opacity: 0.5;
+    font-size: 12px;
+  }
+</style>
