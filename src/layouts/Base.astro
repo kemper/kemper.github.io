@@ -4,41 +4,56 @@ interface Props {
   description?: string;
 }
 
-const { title = "Kris Kemper", description = "Software engineer based in Atlanta, GA." } = Astro.props;
+const { title = "Kris Kemper", description = "Software engineer at Perplexity, based in Atlanta, GA." } = Astro.props;
+const path = Astro.url.pathname;
+const links = [
+  { href: "/", label: "home" },
+  { href: "/about/", label: "about" },
+  { href: "/projects/", label: "projects" },
+];
 ---
 
-<html lang="en" data-theme="nordic">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
+    <meta name="theme-color" content="#07060d" />
     <link rel="icon" href="/favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Orbitron:wght@700;900&display=swap"
+    />
     <title>{title}</title>
     <style is:global>
-      @import "../styles/global.css";
+      @import "../styles/themes.css";
     </style>
     <style is:global>
-      @import "../styles/themes.css";
+      @import "../styles/global.css";
     </style>
   </head>
   <body>
     <div class="wrapper">
       <nav>
         <ul>
-          <li><a href="/">home</a></li>
-          <li><a href="/about/">about</a></li>
-          <li><a href="/projects/">projects</a></li>
+          {links.map(({ href, label }) => (
+            <li><a href={href} aria-current={path === href ? "page" : undefined}>{label}</a></li>
+          ))}
         </ul>
       </nav>
 
       <slot />
 
       <footer>
-        <a href="https://linkedin.com/in/kriskemper">linkedin</a>
-        &nbsp;&middot;&nbsp;
-        <a href="https://github.com/kemper">github</a>
+        <span class="status">online &middot; atl</span>
+        <span>
+          <a href="https://linkedin.com/in/kriskemper">linkedin</a>
+          &nbsp;/&nbsp;
+          <a href="https://github.com/kemper">github</a>
+        </span>
       </footer>
     </div>
-
   </body>
 </html>

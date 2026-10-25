@@ -1,19 +1,24 @@
-/* Nordic: dark, cool tones, minimal */
-[data-theme="nordic"] {
-  --bg: #2e3440;
-  --surface: #3b4252;
-  --text: #d8dee9;
-  --text-bright: #eceff4;
-  --accent: #88c0d0;
-  --accent-hover: #8fbcbb;
-  --heading: #81a1c1;
-  --border: rgba(216, 222, 233, 0.08);
-  --card-bg: rgba(0, 0, 0, 0.15);
-  --card-hover: rgba(136, 192, 208, 0.1);
-  --font: "IBM Plex Mono", "SF Mono", Menlo, monospace;
+/* Cyberpunk: neon on black */
+:root {
+  --bg: #07060d;
+  --surface: rgba(14, 10, 28, 0.78);
+  --text: #c9c6e6;
+  --text-dim: #7d79a8;
+  --text-bright: #f4f1ff;
+  --cyan: #00f0ff;
+  --magenta: #ff2bd6;
+  --yellow: #fcee0a;
+  --accent: var(--cyan);
+  --accent-hover: var(--yellow);
+  --heading: var(--magenta);
+  --border: rgba(0, 240, 255, 0.22);
+  --card-bg: rgba(0, 240, 255, 0.04);
+  --card-hover: rgba(255, 43, 214, 0.08);
+  --font: "JetBrains Mono", "SF Mono", Menlo, monospace;
+  --display: "Orbitron", "JetBrains Mono", sans-serif;
   --font-size: 14px;
-  --heading-size: 12px;
-  --name-size: 24px;
-  --radius: 6px;
+  --heading-size: 13px;
+  --name-size: clamp(34px, 9vw, 56px);
   --line-height: 1.75;
+  --cut: 14px;
 }

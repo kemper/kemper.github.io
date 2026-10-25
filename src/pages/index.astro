@@ -5,8 +5,12 @@ import Base from "../layouts/Base.astro";
 <Base>
   <main>
     <section class="hero">
-      <h1 class="name">Kris Kemper</h1>
-      <p class="tagline">Software Engineer &middot; Atlanta, GA</p>
+      <p class="eyebrow">&gt; identity.resolve()</p>
+      <h1 class="name glitch" data-text="KRIS KEMPER">KRIS KEMPER</h1>
+      <p class="tagline">
+        Software Engineer <span class="sep">//</span>
+        <strong>Perplexity</strong> <span class="sep">//</span> Atlanta, GA
+      </p>
     </section>
 
     <hr class="divider" />
@@ -15,12 +19,13 @@ import Base from "../layouts/Base.astro";
       <p>
         Twenty years building software, from consulting
         and startups to platforms serving thousands of
-        engineers.
+        engineers. Now building at <strong>Perplexity</strong>.
       </p>
       <p>
-        These days I build with AI agents as my primary
-        tools. Professionally, I'm most interested in developer experience and
-        AI-augmented workflows. Personally, I love 3d printing and I'm experimenting with ways to leverage AI for 3d modeling
+        I build with AI agents as my primary tools.
+        Professionally, I'm into developer experience and
+        AI-augmented workflows. Personally, I love 3D printing
+        and I'm finding ways to put AI to work on 3D modeling.<span class="cursor" aria-hidden="true"></span>
       </p>
     </section>
 
@@ -29,13 +34,15 @@ import Base from "../layouts/Base.astro";
     <section>
       <h2>Projects</h2>
       <div class="projects">
-        <a href="/mainifold/" class="project-card">
-          <span class="project-name">mAInifold</span>
-          <span class="project-desc">AI-driven 3D CAD in the browser. Works best with the Claude Chrome extension.</span>
+        <a href="https://www.partwrightstudio.com/" class="project-card">
+          <span class="project-tag">01</span>
+          <span class="project-name">Partwright</span>
+          <span class="project-desc">AI-driven parametric CAD in the browser. Describe something, get a printable 3D model.</span>
         </a>
-<a href="https://github.com/kemper/openscad_projects" class="project-card">
+        <a href="https://github.com/kemper/openscad_projects" class="project-card">
+          <span class="project-tag">02</span>
           <span class="project-name">openscad_projects</span>
-          <span class="project-desc">AI-generated 3D models for printing</span>
+          <span class="project-desc">AI-generated 3D models for printing.</span>
         </a>
       </div>
     </section>
@@ -44,59 +51,148 @@ import Base from "../layouts/Base.astro";
 
 <style>
   .hero {
-    margin-bottom: 0;
+    margin: 1em 0 0;
     text-align: center;
+  }
+
+  .eyebrow {
+    color: var(--magenta);
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-align: center;
+    margin-bottom: 0.8em;
   }
 
   .name {
     font-size: var(--name-size);
-    letter-spacing: 0.05em;
-    color: var(--heading);
-    margin-bottom: 0.3em;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.4em;
+    text-shadow:
+      0 0 12px rgba(0, 240, 255, 0.7),
+      0 0 40px rgba(0, 240, 255, 0.3);
+  }
+
+  .glitch {
+    position: relative;
+    display: inline-block;
+  }
+
+  .glitch::before,
+  .glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .glitch::before {
+    color: var(--magenta);
+    transform: translate(-2px, 0);
+    clip-path: inset(0 0 60% 0);
+    mix-blend-mode: screen;
+    animation: glitch-a 3.5s infinite steps(1);
+  }
+
+  .glitch::after {
+    color: var(--cyan);
+    transform: translate(2px, 0);
+    clip-path: inset(55% 0 0 0);
+    mix-blend-mode: screen;
+    animation: glitch-b 3.5s infinite steps(1);
+  }
+
+  @keyframes glitch-a {
+    0%, 88%, 100% { transform: translate(0); clip-path: inset(0 0 100% 0); }
+    90% { transform: translate(-4px, -1px); clip-path: inset(10% 0 55% 0); }
+    93% { transform: translate(3px, 1px); clip-path: inset(40% 0 30% 0); }
+    96% { transform: translate(-2px, 0); clip-path: inset(70% 0 5% 0); }
+  }
+
+  @keyframes glitch-b {
+    0%, 88%, 100% { transform: translate(0); clip-path: inset(100% 0 0 0); }
+    91% { transform: translate(4px, 1px); clip-path: inset(60% 0 10% 0); }
+    94% { transform: translate(-3px, 0); clip-path: inset(20% 0 60% 0); }
+    97% { transform: translate(2px, -1px); clip-path: inset(5% 0 80% 0); }
   }
 
   .tagline {
-    color: var(--text);
-    opacity: 0.5;
-    font-size: 13px;
-    margin: 0;
+    color: var(--text-dim);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
     text-align: center;
+  }
+
+  .tagline strong {
+    color: var(--yellow);
+    text-shadow: 0 0 8px rgba(252, 238, 10, 0.5);
+  }
+
+  .sep {
+    color: var(--magenta);
+    margin: 0 0.3em;
+  }
+
+  .cursor {
+    display: inline-block;
+    width: 0.6em;
+    height: 1.1em;
+    margin-left: 4px;
+    vertical-align: text-bottom;
+    background: var(--cyan);
+    box-shadow: 0 0 8px var(--cyan);
+    animation: blink 1s steps(2) infinite;
   }
 
   .projects {
     display: flex;
     flex-direction: column;
-    gap: 0.75em;
+    gap: 0.9em;
   }
 
   .project-card {
+    position: relative;
     display: block;
-    padding: 1em 1.2em;
+    padding: 1em 1.2em 1em 3.6em;
     background: var(--card-bg);
     border: 1px solid var(--border);
-    border-radius: var(--radius);
-    transition: border-color 0.15s, background 0.15s;
+    border-left: 3px solid var(--cyan);
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%);
+    transition: background 0.15s, border-color 0.15s, transform 0.15s;
   }
 
   .project-card:hover {
-    border-color: var(--accent);
     background: var(--card-hover);
+    border-color: var(--magenta);
+    transform: translateX(4px);
+    text-shadow: none;
+  }
+
+  .project-tag {
+    position: absolute;
+    left: 1.1em;
+    top: 1.05em;
+    font-family: var(--display);
+    font-size: 12px;
+    color: var(--magenta);
   }
 
   .project-name {
     display: block;
-    color: var(--accent);
-    margin-bottom: 0.15em;
+    font-family: var(--display);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--cyan);
+    margin-bottom: 0.2em;
   }
 
   .project-card:hover .project-name {
-    color: var(--accent-hover);
+    color: var(--yellow);
   }
 
   .project-desc {
     display: block;
-    color: var(--text);
-    opacity: 0.5;
+    color: var(--text-dim);
     font-size: 12px;
   }
 </style>
